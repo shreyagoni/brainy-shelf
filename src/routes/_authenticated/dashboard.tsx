@@ -315,15 +315,15 @@ function PdfsPanel() {
     }
   }
 
-  async function openPdf(pdf: PdfRow) {
-    const { data, error } = await supabase.storage
+  function openPdf(pdf: PdfRow) {
+    const { data } = supabase.storage
       .from("pdfs")
-      .createSignedUrl(pdf.storage_path, 60 * 10);
-    if (error || !data?.signedUrl) {
-      toast.error(error?.message ?? "Could not open file");
+      .getPublicUrl(pdf.storage_path);
+    if (!data?.publicUrl) {
+      toast.error("Could not open file");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener");
+    window.open(data.publicUrl, "_blank", "noopener");
   }
 
   async function deletePdf(pdf: PdfRow) {

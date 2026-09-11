@@ -316,14 +316,14 @@ function PdfsPanel() {
   }
 
   function openPdf(pdf: PdfRow) {
-    const { data } = supabase.storage
-      .from("pdfs")
-      .getPublicUrl(pdf.storage_path);
-    if (!data?.publicUrl) {
+    const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!baseUrl) {
       toast.error("Could not open file");
       return;
     }
-    window.open(data.publicUrl, "_blank", "noopener");
+    const encodedPath = pdf.storage_path.split("/").map(encodeURIComponent).join("/");
+    const pdfUrl = `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/pdfs/${encodedPath}`;
+    window.open(pdfUrl, "_blank");
   }
 
   async function deletePdf(pdf: PdfRow) {

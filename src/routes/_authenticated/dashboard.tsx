@@ -46,6 +46,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -70,6 +71,17 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search notes and PDF titles…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         <Tabs defaultValue="notes">
           <TabsList>
             <TabsTrigger value="notes">
@@ -82,10 +94,10 @@ function Dashboard() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="notes" className="mt-6">
-            <NotesPanel />
+            <NotesPanel query={searchQuery} />
           </TabsContent>
           <TabsContent value="pdfs" className="mt-6">
-            <PdfsPanel />
+            <PdfsPanel query={searchQuery} />
           </TabsContent>
         </Tabs>
       </main>

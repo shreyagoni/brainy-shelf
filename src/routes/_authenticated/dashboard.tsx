@@ -266,10 +266,22 @@ function NotesPanel() {
   );
 }
 
+const DEFAULT_SUBJECTS = [
+  "General",
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Computer Science",
+  "History",
+  "English",
+];
+
 function PdfsPanel() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [subject, setSubject] = useState("General");
 
   const { data: pdfs = [], isLoading } = useQuery({
     queryKey: ["pdfs"],
@@ -282,6 +294,17 @@ function PdfsPanel() {
       return data as PdfRow[];
     },
   });
+
+  const subjectOptions = Array.from(
+    new Set([...DEFAULT_SUBJECTS, ...pdfs.map((p) => p.subject).filter(Boolean)]),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const grouped = pdfs.reduce<Record<string, PdfRow[]>>((acc, pdf) => {
+    const key = pdf.subject?.trim() || "General";
+    (acc[key] ??= []).push(pdf);
+    return acc;
+  }, {});
+  const groupNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -305,6 +328,7 @@ function PdfsPanel() {
         file_name: file.name,
         storage_path: path,
         file_size: file.size,
+        subject: subject.trim() || "General",
       });
       if (insertError) throw insertError;
       toast.success("PDF uploaded");
@@ -354,14 +378,34 @@ function PdfsPanel() {
         className="hidden"
         onChange={handleUpload}
       />
-      <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-        {uploading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Upload className="mr-2 h-4 w-4" />
-        )}
-        Upload PDF
-      </Button>
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label htmlFor="pdf-subject" className="text-sm font-medium">
+            Subject
+          </label>
+          <Input
+            id="pdf-subject"
+            list="pdf-subject-options"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="e.g. Physics"
+            className="mt-1.5"
+          />
+          <datalist id="pdf-subject-options">
+            {subjectOptions.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        </div>
+        <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          {uploading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="mr-2 h-4 w-4" />
+          )}
+          Upload PDF
+        </Button>
+      </div>
 
       <div className="mt-6">
         {isLoading ? (
@@ -370,40 +414,53 @@ function PdfsPanel() {
           </div>
         ) : pdfs.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            No PDFs yet. Upload your first study document.
+            No PDFs yet. Pick a subject and upload your first study document.
           </p>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {pdfs.map((pdf) => (
-              <li
-                key={pdf.id}
-                className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
-              >
-                <FileText className="h-8 w-8 shrink-0 text-primary" />
-                <a
-                  className="min-w-0 flex-1 text-left"
-                  href={getPdfUrl(pdf)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Open PDF"
-                >
-                  <p className="truncate text-sm font-semibold hover:underline">
-                    {pdf.file_name}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatSize(pdf.file_size)} · {new Date(pdf.created_at).toLocaleDateString()}
-                  </p>
-                </a>
-                <button
-                  aria-label="Delete PDF"
-                  className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                  onClick={() => deletePdf(pdf)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </li>
+          <div className="space-y-8">
+            {groupNames.map((name) => (
+              <section key={name}>
+                <h3 className="font-display text-lg font-semibold">
+                  {name}
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    {grouped[name]!.length}
+                  </span>
+                </h3>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {grouped[name]!.map((pdf) => (
+                    <li
+                      key={pdf.id}
+                      className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
+                    >
+                      <FileText className="h-8 w-8 shrink-0 text-primary" />
+                      <a
+                        className="min-w-0 flex-1 text-left"
+                        href={getPdfUrl(pdf)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open PDF"
+                      >
+                        <p className="truncate text-sm font-semibold hover:underline">
+                          {pdf.file_name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {formatSize(pdf.file_size)} ·{" "}
+                          {new Date(pdf.created_at).toLocaleDateString()}
+                        </p>
+                      </a>
+                      <button
+                        aria-label="Delete PDF"
+                        className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                        onClick={() => deletePdf(pdf)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>

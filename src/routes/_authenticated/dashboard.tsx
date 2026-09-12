@@ -8,6 +8,7 @@ import {
   LogOut,
   NotebookPen,
   Plus,
+  Search,
   Trash2,
   Upload,
 } from "lucide-react";

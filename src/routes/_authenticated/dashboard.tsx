@@ -294,7 +294,7 @@ const DEFAULT_SUBJECTS = [
   "English",
 ];
 
-function PdfsPanel() {
+function PdfsPanel({ query }: { query: string }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);

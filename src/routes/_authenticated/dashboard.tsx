@@ -316,7 +316,7 @@ function PdfsPanel() {
   }
 
   function getPdfUrl(pdf: PdfRow) {
-    const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const baseUrl = import.meta.env["VITE_SUPABASE_URL"];
     if (!baseUrl) return "#";
     const encodedPath = pdf.storage_path.split("/").map(encodeURIComponent).join("/");
     return `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/pdfs/${encodedPath}`;

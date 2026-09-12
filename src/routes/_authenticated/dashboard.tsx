@@ -315,15 +315,11 @@ function PdfsPanel() {
     }
   }
 
-  function openPdf(pdf: PdfRow) {
-    const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!baseUrl) {
-      toast.error("Could not open file");
-      return;
-    }
+  function getPdfUrl(pdf: PdfRow) {
+    const baseUrl = import.meta.env["VITE_SUPABASE_URL"];
+    if (!baseUrl) return "#";
     const encodedPath = pdf.storage_path.split("/").map(encodeURIComponent).join("/");
-    const pdfUrl = `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/pdfs/${encodedPath}`;
-    window.open(pdfUrl, "_blank");
+    return `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/pdfs/${encodedPath}`;
   }
 
   async function deletePdf(pdf: PdfRow) {
@@ -383,9 +379,11 @@ function PdfsPanel() {
                 className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
               >
                 <FileText className="h-8 w-8 shrink-0 text-primary" />
-                <button
+                <a
                   className="min-w-0 flex-1 text-left"
-                  onClick={() => openPdf(pdf)}
+                  href={getPdfUrl(pdf)}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   title="Open PDF"
                 >
                   <p className="truncate text-sm font-semibold hover:underline">
@@ -394,7 +392,7 @@ function PdfsPanel() {
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {formatSize(pdf.file_size)} · {new Date(pdf.created_at).toLocaleDateString()}
                   </p>
-                </button>
+                </a>
                 <button
                   aria-label="Delete PDF"
                   className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"

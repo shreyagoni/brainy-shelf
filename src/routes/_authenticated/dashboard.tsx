@@ -433,9 +433,11 @@ function PdfsPanel({ query }: { query: string }) {
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : pdfs.length === 0 ? (
+        ) : filteredPdfs.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            No PDFs yet. Pick a subject and upload your first study document.
+            {query
+              ? "No PDFs match your search."
+              : "No PDFs yet. Pick a subject and upload your first study document."}
           </p>
         ) : (
           <div className="space-y-8">

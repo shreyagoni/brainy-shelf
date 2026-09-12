@@ -8,6 +8,7 @@ import {
   LogOut,
   NotebookPen,
   Plus,
+  Search,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -69,6 +71,17 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search notes and PDF titles…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         <Tabs defaultValue="notes">
           <TabsList>
             <TabsTrigger value="notes">
@@ -81,10 +94,10 @@ function Dashboard() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="notes" className="mt-6">
-            <NotesPanel />
+            <NotesPanel query={searchQuery} />
           </TabsContent>
           <TabsContent value="pdfs" className="mt-6">
-            <PdfsPanel />
+            <PdfsPanel query={searchQuery} />
           </TabsContent>
         </Tabs>
       </main>
@@ -92,7 +105,7 @@ function Dashboard() {
   );
 }
 
-function NotesPanel() {
+function NotesPanel({ query }: { query: string }) {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -112,7 +125,11 @@ function NotesPanel() {
     },
   });
 
-  const selected = notes.find((n) => n.id === selectedId) ?? null;
+  const filteredNotes = notes.filter((note) =>
+    note.title.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  const selected = filteredNotes.find((n) => n.id === selectedId) ?? null;
 
   // Keep editor in sync when selection changes
   useEffect(() => {
@@ -187,12 +204,12 @@ function NotesPanel() {
           New note
         </Button>
         <div className="space-y-2">
-          {notes.length === 0 && (
+          {filteredNotes.length === 0 && (
             <p className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-              No notes yet. Create your first one!
+              {query ? "No notes match your search." : "No notes yet. Create your first one!"}
             </p>
           )}
-          {notes.map((note) => (
+          {filteredNotes.map((note) => (
             <div
               key={note.id}
               className={`group flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
@@ -277,7 +294,7 @@ const DEFAULT_SUBJECTS = [
   "English",
 ];
 
-function PdfsPanel() {
+function PdfsPanel({ query }: { query: string }) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -295,11 +312,15 @@ function PdfsPanel() {
     },
   });
 
+  const filteredPdfs = pdfs.filter((pdf) =>
+    pdf.file_name.toLowerCase().includes(query.toLowerCase()),
+  );
+
   const subjectOptions = Array.from(
     new Set([...DEFAULT_SUBJECTS, ...pdfs.map((p) => p.subject).filter(Boolean)]),
   ).sort((a, b) => a.localeCompare(b));
 
-  const grouped = pdfs.reduce<Record<string, PdfRow[]>>((acc, pdf) => {
+  const grouped = filteredPdfs.reduce<Record<string, PdfRow[]>>((acc, pdf) => {
     const key = pdf.subject?.trim() || "General";
     (acc[key] ??= []).push(pdf);
     return acc;
@@ -412,9 +433,11 @@ function PdfsPanel() {
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : pdfs.length === 0 ? (
+        ) : filteredPdfs.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            No PDFs yet. Pick a subject and upload your first study document.
+            {query
+              ? "No PDFs match your search."
+              : "No PDFs yet. Pick a subject and upload your first study document."}
           </p>
         ) : (
           <div className="space-y-8">

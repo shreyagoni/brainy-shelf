@@ -34,6 +34,7 @@ type PdfRow = {
   file_name: string;
   storage_path: string;
   file_size: number;
+  subject: string;
   created_at: string;
 };
 

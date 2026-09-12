@@ -204,12 +204,12 @@ function NotesPanel({ query }: { query: string }) {
           New note
         </Button>
         <div className="space-y-2">
-          {notes.length === 0 && (
+          {filteredNotes.length === 0 && (
             <p className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-              No notes yet. Create your first one!
+              {query ? "No notes match your search." : "No notes yet. Create your first one!"}
             </p>
           )}
-          {notes.map((note) => (
+          {filteredNotes.map((note) => (
             <div
               key={note.id}
               className={`group flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${

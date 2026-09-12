@@ -48,6 +48,7 @@ export type Database = {
           file_size: number
           id: string
           storage_path: string
+          subject: string
           updated_at: string
           user_id: string
         }
@@ -57,6 +58,7 @@ export type Database = {
           file_size?: number
           id?: string
           storage_path: string
+          subject?: string
           updated_at?: string
           user_id: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           file_size?: number
           id?: string
           storage_path?: string
+          subject?: string
           updated_at?: string
           user_id?: string
         }

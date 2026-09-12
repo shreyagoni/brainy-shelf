@@ -1,0 +1,1 @@
+ALTER TABLE public.pdfs ADD COLUMN subject text NOT NULL DEFAULT 'General';

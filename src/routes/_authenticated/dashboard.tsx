@@ -312,11 +312,15 @@ function PdfsPanel({ query }: { query: string }) {
     },
   });
 
+  const filteredPdfs = pdfs.filter((pdf) =>
+    pdf.file_name.toLowerCase().includes(query.toLowerCase()),
+  );
+
   const subjectOptions = Array.from(
     new Set([...DEFAULT_SUBJECTS, ...pdfs.map((p) => p.subject).filter(Boolean)]),
   ).sort((a, b) => a.localeCompare(b));
 
-  const grouped = pdfs.reduce<Record<string, PdfRow[]>>((acc, pdf) => {
+  const grouped = filteredPdfs.reduce<Record<string, PdfRow[]>>((acc, pdf) => {
     const key = pdf.subject?.trim() || "General";
     (acc[key] ??= []).push(pdf);
     return acc;

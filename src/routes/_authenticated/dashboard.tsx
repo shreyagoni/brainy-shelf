@@ -105,7 +105,7 @@ function Dashboard() {
   );
 }
 
-function NotesPanel() {
+function NotesPanel({ query }: { query: string }) {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");

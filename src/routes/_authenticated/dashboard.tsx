@@ -125,7 +125,11 @@ function NotesPanel({ query }: { query: string }) {
     },
   });
 
-  const selected = notes.find((n) => n.id === selectedId) ?? null;
+  const filteredNotes = notes.filter((note) =>
+    note.title.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  const selected = filteredNotes.find((n) => n.id === selectedId) ?? null;
 
   // Keep editor in sync when selection changes
   useEffect(() => {

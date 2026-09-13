@@ -41,6 +41,41 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_highlights: {
+        Row: {
+          created_at: string
+          id: string
+          page_number: number
+          pdf_id: string
+          selected_text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_number: number
+          pdf_id: string
+          selected_text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_number?: number
+          pdf_id?: string
+          selected_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_highlights_pdf_id_fkey"
+            columns: ["pdf_id"]
+            isOneToOne: false
+            referencedRelation: "pdfs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdfs: {
         Row: {
           created_at: string

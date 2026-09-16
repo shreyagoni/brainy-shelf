@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiExplainerRouteImport } from './routes/api/explainer'
+import { Route as ApiStudyPartnerRouteImport } from './routes/api/study-partner'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const ApiExplainerRoute = ApiExplainerRouteImport.update({
   path: '/api/explainer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStudyPartnerRoute = ApiStudyPartnerRouteImport.update({
+  id: '/api/study-partner',
+  path: '/api/study-partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/explainer': typeof ApiExplainerRoute
+  '/api/study-partner': typeof ApiStudyPartnerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/explainer': typeof ApiExplainerRoute
+  '/api/study-partner': typeof ApiStudyPartnerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/explainer': typeof ApiExplainerRoute
+  '/api/study-partner': typeof ApiStudyPartnerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/api/explainer'
+  fullPaths:
+    '/' | '/auth' | '/dashboard' | '/api/explainer' | '/api/study-partner'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/api/explainer'
+  to: '/' | '/auth' | '/dashboard' | '/api/explainer' | '/api/study-partner'
   id:
     | '__root__'
     | '/'
@@ -72,6 +82,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/api/explainer'
+    | '/api/study-partner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -79,6 +90,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiExplainerRoute: typeof ApiExplainerRoute
+  ApiStudyPartnerRoute: typeof ApiStudyPartnerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -118,6 +130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiExplainerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/study-partner': {
+      id: '/api/study-partner'
+      path: '/api/study-partner'
+      fullPath: '/api/study-partner'
+      preLoaderRoute: typeof ApiStudyPartnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -137,6 +156,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiExplainerRoute: ApiExplainerRoute,
+  ApiStudyPartnerRoute: ApiStudyPartnerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

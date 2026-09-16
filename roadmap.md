@@ -1,0 +1,3 @@
+- [ ] Add a protected Gemini study-partner endpoint.
+- [ ] Add a dashboard chat panel with quick prompts and error states.
+- [ ] Verify the dashboard and study-partner request in the preview.

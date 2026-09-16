@@ -9,6 +9,7 @@ import {
   NotebookPen,
   Plus,
   Search,
+  Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudyPartner } from "@/components/study-partner";
 
 type Note = {
   id: string;
@@ -40,6 +42,22 @@ type PdfRow = {
 };
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Study dashboard | StudyMate" },
+      {
+        name: "description",
+        content: "Organize your notes and PDFs, then study with your personal AI-powered study partner.",
+      },
+      { property: "og:title", content: "Study dashboard | StudyMate" },
+      {
+        property: "og:description",
+        content: "Organize notes and PDFs and get help from your StudyMate study partner.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Dashboard,
 });
 
@@ -92,12 +110,19 @@ function Dashboard() {
               <FileText className="mr-2 h-4 w-4" />
               PDFs
             </TabsTrigger>
+            <TabsTrigger value="study-partner">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Study partner
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="notes" className="mt-6">
             <NotesPanel query={searchQuery} />
           </TabsContent>
           <TabsContent value="pdfs" className="mt-6">
             <PdfsPanel query={searchQuery} />
+          </TabsContent>
+          <TabsContent value="study-partner" className="mt-6">
+            <StudyPartner />
           </TabsContent>
         </Tabs>
       </main>

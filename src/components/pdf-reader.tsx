@@ -18,26 +18,9 @@ type Highlight = {
   selected_text: string;
 };
 
-type PdfViewport = {
-  width: number;
-  height: number;
-};
-
-type PdfPage = {
-  getViewport: (options: { scale: number }) => PdfViewport;
-  getTextContent: () => Promise<unknown>;
-  render: (options: {
-    canvasContext: CanvasRenderingContext2D;
-    viewport: PdfViewport;
-  }) => { promise: Promise<void>; cancel: () => void };
-  cleanup: () => void;
-};
-
-type PdfDocument = {
-  numPages: number;
-  getPage: (pageNumber: number) => Promise<PdfPage>;
-  destroy: () => Promise<void>;
-};
+type PdfViewport = import("pdfjs-dist").PageViewport;
+type PdfPage = import("pdfjs-dist").PDFPageProxy;
+type PdfDocument = import("pdfjs-dist").PDFDocumentProxy;
 
 type PdfJsModule = typeof import("pdfjs-dist");
 type TextLayerOptions = ConstructorParameters<PdfJsModule["TextLayer"]>[0];
@@ -222,7 +205,7 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
           import.meta.url,
         ).toString();
         const loadingTask = module.getDocument({ url: pdfUrl });
-        const loadedDocument = await loadingTask.promise;
+         const loadedDocument = await loadingTask.promise;
         if (!cancelled) {
           setPdfJs(module);
           setDocument(loadedDocument);

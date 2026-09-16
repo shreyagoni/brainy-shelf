@@ -21,6 +21,13 @@ type Highlight = {
 type PdfViewport = {
   width: number;
   height: number;
+  viewBox: number[];
+  userUnit: number;
+  scale: number;
+  rotation: number;
+  offsetX: number;
+  offsetY: number;
+  transform: number[];
 };
 
 type PdfPage = {
@@ -120,7 +127,7 @@ function PdfPageView({
       try {
         const page = await document.getPage(pageNumber);
         if (cancelled) return;
-        const viewport = page.getViewport({ scale: 1.35 });
+        const viewport = page.getViewport({ scale: 1.35 }) as PdfViewport;
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Canvas is unavailable");
 
@@ -222,7 +229,7 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
           import.meta.url,
         ).toString();
         const loadingTask = module.getDocument({ url: pdfUrl });
-        const loadedDocument = await loadingTask.promise;
+         const loadedDocument = await loadingTask.promise;
         if (!cancelled) {
           setPdfJs(module);
           setDocument(loadedDocument);

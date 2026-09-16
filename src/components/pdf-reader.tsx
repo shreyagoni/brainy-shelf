@@ -18,33 +18,9 @@ type Highlight = {
   selected_text: string;
 };
 
-type PdfViewport = {
-  width: number;
-  height: number;
-  viewBox: number[];
-  userUnit: number;
-  scale: number;
-  rotation: number;
-  offsetX: number;
-  offsetY: number;
-  transform: number[];
-};
-
-type PdfPage = {
-  getViewport: (options: { scale: number }) => PdfViewport;
-  getTextContent: () => Promise<unknown>;
-  render: (options: {
-    canvasContext: CanvasRenderingContext2D;
-    viewport: PdfViewport;
-  }) => { promise: Promise<void>; cancel: () => void };
-  cleanup: () => void;
-};
-
-type PdfDocument = {
-  numPages: number;
-  getPage: (pageNumber: number) => Promise<PdfPage>;
-  destroy: () => Promise<void>;
-};
+type PdfViewport = import("pdfjs-dist").PageViewport;
+type PdfPage = import("pdfjs-dist").PDFPageProxy;
+type PdfDocument = import("pdfjs-dist").PDFDocumentProxy;
 
 type PdfJsModule = typeof import("pdfjs-dist");
 type TextLayerOptions = ConstructorParameters<PdfJsModule["TextLayer"]>[0];
@@ -127,7 +103,7 @@ function PdfPageView({
       try {
         const page = await document.getPage(pageNumber);
         if (cancelled) return;
-        const viewport = page.getViewport({ scale: 1.35 }) as PdfViewport;
+        const viewport = page.getViewport({ scale: 1.35 });
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Canvas is unavailable");
 

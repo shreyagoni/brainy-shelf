@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
+  BookOpenCheck,
   BookOpenText,
   FileText,
   Loader2,
@@ -20,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { PdfReader } from "@/components/pdf-reader";
 import { StudyPartner } from "@/components/study-partner";
 
 type Note = {
@@ -324,6 +327,7 @@ function PdfsPanel({ query }: { query: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [subject, setSubject] = useState("General");
+  const [readerPdf, setReaderPdf] = useState<PdfRow | null>(null);
 
   const { data: pdfs = [], isLoading } = useQuery({
     queryKey: ["pdfs"],
@@ -496,6 +500,16 @@ function PdfsPanel({ query }: { query: string }) {
                           {new Date(pdf.created_at).toLocaleDateString()}
                         </p>
                       </a>
+                       <Button
+                         variant="ghost"
+                         size="icon"
+                         className="shrink-0"
+                         aria-label={`Read and highlight ${pdf.file_name}`}
+                         title="Read and highlight"
+                         onClick={() => setReaderPdf(pdf)}
+                       >
+                         <BookOpenCheck className="h-4 w-4" />
+                       </Button>
                       <button
                         aria-label="Delete PDF"
                         className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
@@ -511,6 +525,11 @@ function PdfsPanel({ query }: { query: string }) {
           </div>
         )}
       </div>
+      <Dialog open={readerPdf !== null} onOpenChange={(open) => !open && setReaderPdf(null)}>
+        <DialogContent className="h-[min(92vh,960px)] max-w-[min(1200px,calc(100vw-2rem))] overflow-hidden p-0">
+          {readerPdf && <PdfReader pdf={readerPdf} onClose={() => setReaderPdf(null)} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpenCheck, Check, Highlighter, Lightbulb, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,7 @@ type Highlight = {
   selected_text: string;
 };
 
-type PdfViewport = import("pdfjs-dist").PageViewport;
-type PdfPage = import("pdfjs-dist").PDFPageProxy;
-type PdfDocument = import("pdfjs-dist").PDFDocumentProxy;
+type PdfDocument = PDFDocumentProxy;
 
 type PdfJsModule = typeof import("pdfjs-dist");
 type TextLayerOptions = ConstructorParameters<PdfJsModule["TextLayer"]>[0];
@@ -90,7 +89,7 @@ function PdfPageView({
 
   useEffect(() => {
     let cancelled = false;
-    let renderTask: { cancel: () => void } | undefined;
+    let renderTask: RenderTask | undefined;
     let textLayer: InstanceType<PdfJsModule["TextLayer"]> | undefined;
 
     async function renderPage() {
@@ -182,6 +181,7 @@ function PdfPageView({
 export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => void }) {
   const [pdfJs, setPdfJs] = useState<PdfJsModule | null>(null);
   const [document, setDocument] = useState<PdfDocument | null>(null);
+  const documentRef = useRef<PdfDocument | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(true);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [selectedHighlightId, setSelectedHighlightId] = useState<string | null>(null);
@@ -195,9 +195,13 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
 
   useEffect(() => {
     let cancelled = false;
+    let loadedDocument: PdfDocument | null = null;
+
     async function loadPdf() {
       setLoadingDocument(true);
       setDocument(null);
+      void documentRef.current?.destroy();
+      documentRef.current = null;
       try {
         const module = await import("pdfjs-dist");
         module.GlobalWorkerOptions.workerSrc = new URL(
@@ -205,10 +209,11 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
           import.meta.url,
         ).toString();
         const loadingTask = module.getDocument({ url: pdfUrl });
-         const loadedDocument = await loadingTask.promise;
+        loadedDocument = await loadingTask.promise;
         if (!cancelled) {
           setPdfJs(module);
           setDocument(loadedDocument);
+          documentRef.current = loadedDocument;
           setLoadingDocument(false);
         } else {
           await loadedDocument.destroy();
@@ -224,9 +229,10 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
     void loadPdf();
     return () => {
       cancelled = true;
-      if (document) void document.destroy();
+      if (loadedDocument) void loadedDocument.destroy();
+      documentRef.current = null;
     };
-  }, [document, pdfUrl]);
+  }, [pdfUrl]);
 
   useEffect(() => {
     let cancelled = false;

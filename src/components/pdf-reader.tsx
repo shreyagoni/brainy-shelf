@@ -115,7 +115,7 @@ function PdfPageView({
         textLayerContainer.style.height = `${viewport.height}px`;
         context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
 
-        renderTask = page.render({ canvasContext: context, viewport });
+        renderTask = page.render({ canvas, viewport });
         const textContent = await page.getTextContent();
         textLayer = new pdfJs.TextLayer({
           textContentSource: textContent as TextLayerOptions["textContentSource"],
@@ -200,7 +200,7 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
     async function loadPdf() {
       setLoadingDocument(true);
       setDocument(null);
-      void documentRef.current?.destroy();
+      void documentRef.current?.cleanup();
       documentRef.current = null;
       try {
         const module = await import("pdfjs-dist");
@@ -216,7 +216,7 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
           documentRef.current = loadedDocument;
           setLoadingDocument(false);
         } else {
-          await loadedDocument.destroy();
+          await loadedDocument.cleanup();
         }
       } catch (error) {
         console.error("Could not load PDF", error);
@@ -229,7 +229,7 @@ export function PdfReader({ pdf, onClose }: { pdf: PdfRecord; onClose: () => voi
     void loadPdf();
     return () => {
       cancelled = true;
-      if (loadedDocument) void loadedDocument.destroy();
+      if (loadedDocument) void loadedDocument.cleanup();
       documentRef.current = null;
     };
   }, [pdfUrl]);
